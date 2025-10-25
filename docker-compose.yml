@@ -1,0 +1,49 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: tenancy-app
+    container_name: tenancy-app
+    restart: unless-stopped
+    working_dir: /var/www/html
+    volumes:
+      - .:/var/www/html
+    networks:
+      - tenancy-network
+
+  db:
+    image: mysql:8.0
+    container_name: tenancy-db
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: tenancy_db
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_PASSWORD: password
+      MYSQL_USER: user
+    volumes:
+      - dbdata:/var/lib/mysql
+    networks:
+      - tenancy-network
+
+  web:
+    image: nginx:alpine
+    container_name: tenancy-web
+    restart: unless-stopped
+    ports:
+      - "8000:80"
+    volumes:
+      - .:/var/www/html
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+    networks:
+      - tenancy-network
+
+networks:
+  tenancy-network:
+    driver: bridge
+
+volumes:
+  dbdata:
+    driver: local
