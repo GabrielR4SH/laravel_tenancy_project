@@ -59,5 +59,29 @@ class OrganizationSeeder extends Seeder
                 'due_date' => now()->addDays($i),
             ]);
         }
+
+        // Org C
+        $orgC = Organization::create([
+            'name' => 'Org C',
+            'primary_color' => '#0000FF', // blue
+            'secondary_color' => '#FFFF00', // yellow
+            'theme_style' => 'dark',
+        ]);
+        $userC = User::create([
+            'name' => 'User C',
+            'email' => 'user3@org3.com',
+            'password' => Hash::make('password'),
+            'organization_id' => $orgC->id,
+        ]);
+        for ($i = 1; $i <= 5; $i++) {
+            Task::create([
+                'organization_id' => $orgC->id,
+                'title' => "Task $i for Org C",
+                'description' => "Description $i",
+                'status' => 'pending',
+                'priority' => 'medium',
+                'due_date' => now()->addDays($i),
+            ]);
+        }
     }
 }

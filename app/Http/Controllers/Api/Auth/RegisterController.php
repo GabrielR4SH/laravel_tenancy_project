@@ -12,18 +12,21 @@ class RegisterController extends Controller
 {
     public function __invoke(RegisterRequest $request)
     {
-        $organization = Organization::create([
-            'name' => $request->organization_name,
-            'primary_color' => '#FF0000',
-            'secondary_color' => '#000000',
-            'theme_style' => 'dark',
-        ]);
+        // Busca ou cria a organização
+        $organization = Organization::firstOrCreate(
+            ['name' => $request->organization_name],
+            [
+                'primary_color' => '#FF0000',
+                'secondary_color' => '#000000',
+                'theme_style' => 'dark',
+            ]
+        );
 
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-            'organization_id' => $organization->id,
+            'organization_id' => $organization->id, // Usa o id existente ou novo
         ]);
 
         $token = $user->createToken('auth_token')->plainTextToken;
