@@ -21,3 +21,8 @@ export interface User {
   email: string;
   organization: Organization;
 }
+
+export interface AuthResponse {
+  user: User;
+  token: string;
+}

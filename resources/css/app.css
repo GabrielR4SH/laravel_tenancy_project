@@ -1,3 +1,38 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+    --primary-color: #FF0000; /* Default red */
+    --secondary-color: #000000; /* Default black */
+}
+
+body.light {
+    background-color: white;
+    color: black;
+}
+
+body.dark {
+    background-color: black;
+    color: white;
+}
+
+h1, h2, h3 {
+    color: var(--primary-color);
+}
+
+button {
+    background-color: var(--secondary-color);
+    color: white;
+    padding: 0.5rem 1rem;
+    border: none;
+    cursor: pointer;
+}
+
+button:hover {
+    opacity: 0.8;
+}

@@ -9,11 +9,16 @@ use Illuminate\Http\JsonResponse;
 
 class LoginController extends Controller
 {
-    public function __construct(private AuthService $authService) {}
-
-    public function __invoke(LoginRequest $request): JsonResponse
+    public function __construct(private AuthService $authService)
     {
+    }
+
+    public function __invoke(LoginRequest $request)
+    {
+        console.log('LoginController chamado'); // Debug no backend (se habilitado)
         [$user, $token] = $this->authService->login($request->validated());
-        return response()->json(['user' => $user, 'token' => $token]);
+        console.log('Usuário logado e token gerado:', ['user' => $user, 'token' => $token]); // Debug no backend
+        return Inertia::location('/dashboard')
+            ->with(['token' => $token]); // Passa o token para o frontend
     }
 }

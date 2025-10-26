@@ -1,26 +1,102 @@
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Head } from '@inertiajs/react';
+import { useEffect, useState } from 'react';
+import axios from 'axios';
+import { Task } from '../types';
+import AuthenticatedLayout from '../Layouts/AuthenticatedLayout';
 
 export default function Dashboard() {
-    return (
-        <AuthenticatedLayout
-            header={
-                <h2 className="text-xl font-semibold leading-tight text-gray-800">
-                    Dashboard
-                </h2>
-            }
-        >
-            <Head title="Dashboard" />
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [newTask, setNewTask] = useState({ title: '', description: '' });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const token = localStorage.getItem('token');
 
-            <div className="py-12">
-                <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
-                    <div className="overflow-hidden bg-white shadow-sm sm:rounded-lg">
-                        <div className="p-6 text-gray-900">
-                            You're loggesssd sssssin!
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </AuthenticatedLayout>
-    );
+  useEffect(() => {
+  console.log('Token:', token);
+  if (!token) {
+    setError('Usuário não autenticado. Faça login primeiro.');
+    setLoading(false);
+    return;
+  }
+  setLoading(true);
+  axios.get('http://localhost:8000/api/tasks', {
+    headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' },
+  })
+    .then((res) => {
+      console.log('Tarefas recebidas:', res.data);
+      setTasks(res.data);
+    })
+    .catch((err) => {
+      console.error('Erro ao carregar tarefas:', err.response?.data || err.message);
+      setError('Erro ao carregar tarefas');
+    })
+    .finally(() => setLoading(false));
+}, [token]);
+
+  const handleCreate = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!token) {
+      setError('Usuário não autenticado');
+      return;
+    }
+    setLoading(true);
+    axios.post('http://localhost:8000/api/tasks', newTask, {
+      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+    })
+      .then((res) => {
+        console.log('Tarefa criada:', res.data);
+        setTasks([...tasks, res.data]);
+        setNewTask({ title: '', description: '' });
+      })
+      .catch((err) => {
+        console.error('Erro ao criar tarefa:', err.response?.data || err.message);
+        setError('Erro ao criar tarefa: ' + (err.response?.data?.message || ''));
+      })
+      .finally(() => setLoading(false));
+  };
+
+  return (
+    <AuthenticatedLayout
+      user={{ name: 'User A' }} // Ajuste com auth.user se disponível
+      header={<h2>Dashboard</h2>}
+    >
+      <div className="py-12">
+        <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
+          {error && <p className="text-red-500">{error}</p>}
+          {loading && <p>Carregando...</p>}
+
+          <form onSubmit={handleCreate} className="mb-4">
+            <input
+              type="text"
+              value={newTask.title}
+              onChange={(e) => setNewTask({ ...newTask, title: e.target.value })}
+              placeholder="Título"
+              className="border p-2 mr-2"
+              required
+            />
+            <textarea
+              value={newTask.description}
+              onChange={(e) => setNewTask({ ...newTask, description: e.target.value })}
+              placeholder="Descrição"
+              className="border p-2 mr-2"
+            />
+            <button type="submit" disabled={loading} className="bg-blue-500 text-white p-2">
+              Criar Tarefa
+            </button>
+          </form>
+
+          <ul>
+            {tasks.length > 0 ? (
+              tasks.map((task) => (
+                <li key={task.id} className="mb-2 p-2 border">
+                  {task.title} - {task.status}
+                </li>
+              ))
+            ) : (
+              <p>Nenhuma tarefa encontrada.</p>
+            )}
+          </ul>
+        </div>
+      </div>
+    </AuthenticatedLayout>
+  );
 }
