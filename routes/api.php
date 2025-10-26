@@ -8,7 +8,7 @@ use App\Http\Controllers\Api\TaskController;
 
 // Public routes
 Route::post('/register', RegisterController::class);
-Route::post('/login', LoginController::class);
+Route::post('/login', [LoginController::class, '__invoke']);
 
 // Authenticated routes
 Route::middleware('auth:sanctum')->group(function () {

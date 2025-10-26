@@ -2,38 +2,46 @@ import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Task } from '../types';
 import AuthenticatedLayout from '../Layouts/AuthenticatedLayout';
+import { usePage } from '@inertiajs/react';
 
 export default function Dashboard() {
+  const { props } = usePage(); // Para acessar props do Inertia
+  if (props.token && !localStorage.getItem('token')) {
+    localStorage.setItem('token', props.token);
+    console.log('Token recebido do login e salvo:', props.token); // Debug
+  }
+
+  const token = localStorage.getItem('token') || props.token; // Fallback com props.token
   const [tasks, setTasks] = useState<Task[]>([]);
   const [newTask, setNewTask] = useState({ title: '', description: '' });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const token = localStorage.getItem('token');
 
   useEffect(() => {
-  console.log('Token:', token);
-  if (!token) {
-    setError('Usuário não autenticado. Faça login primeiro.');
-    setLoading(false);
-    return;
-  }
-  setLoading(true);
-  axios.get('http://localhost:8000/api/tasks', {
-    headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' },
-  })
-    .then((res) => {
-      console.log('Tarefas recebidas:', res.data);
-      setTasks(res.data);
+    console.log('Token no Dashboard:', token); // Debug
+    if (!token) {
+      setError('Usuário não autenticado. Faça login primeiro.');
+      setLoading(false);
+      return;
+    }
+    setLoading(true);
+    axios.get('http://localhost:8000/api/tasks', {
+      headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' },
     })
-    .catch((err) => {
-      console.error('Erro ao carregar tarefas:', err.response?.data || err.message);
-      setError('Erro ao carregar tarefas');
-    })
-    .finally(() => setLoading(false));
-}, [token]);
+      .then((res) => {
+        console.log('Tarefas recebidas:', res.data); // Debug
+        setTasks(res.data);
+      })
+      .catch((err) => {
+        console.error('Erro ao carregar tarefas:', err.response?.data || err.message); // Debug
+        setError('Erro ao carregar tarefas');
+      })
+      .finally(() => setLoading(false));
+  }, [token]);
 
   const handleCreate = (e: React.FormEvent) => {
     e.preventDefault();
+    console.log('Tentando criar tarefa:', { ...newTask, token }); // Debug
     if (!token) {
       setError('Usuário não autenticado');
       return;
@@ -43,12 +51,12 @@ export default function Dashboard() {
       headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
     })
       .then((res) => {
-        console.log('Tarefa criada:', res.data);
+        console.log('Tarefa criada:', res.data); // Debug
         setTasks([...tasks, res.data]);
         setNewTask({ title: '', description: '' });
       })
       .catch((err) => {
-        console.error('Erro ao criar tarefa:', err.response?.data || err.message);
+        console.error('Erro ao criar tarefa:', err.response?.data || err.message); // Debug
         setError('Erro ao criar tarefa: ' + (err.response?.data?.message || ''));
       })
       .finally(() => setLoading(false));
@@ -56,7 +64,7 @@ export default function Dashboard() {
 
   return (
     <AuthenticatedLayout
-      user={{ name: 'User A' }} // Ajuste com auth.user se disponível
+      user={props.auth?.user || { name: 'User A' }} // Fallback com auth.user do Inertia
       header={<h2>Dashboard</h2>}
     >
       <div className="py-12">

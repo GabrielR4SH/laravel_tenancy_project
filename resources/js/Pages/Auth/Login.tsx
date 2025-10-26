@@ -17,7 +17,7 @@ export default function Login() {
           localStorage.setItem('token', token);
           console.log('Token salvo:', token); // Debug
         } else {
-          console.error('Token não encontrado na resposta Inertia');
+          console.error('Token não encontrado na resposta Inertia'); // Debug
         }
       },
       onError: (err) => {
@@ -25,7 +25,6 @@ export default function Login() {
       },
       onFinish: () => {
         console.log('Requisição concluída, redirecionando para /dashboard'); // Debug
-        // Inertia deve redirecionar automaticamente
       },
     });
   };
