@@ -135,7 +135,6 @@ Como diferencial, implementei testes básicos usando PHPUnit (Laravel). Foco em 
 (mesmo que poucos, como pedido).
 
 ## Decisões Técnicas
-- **Multi-Tenancy**: Implementado filtrando queries por `organization_id` do usuário logado no Service/Repository. Testado com seeders.
 - **Padrão Controller-Service-Repository**: Aplicado apenas às tarefas, como exemplo no teste. Controllers enxutos, lógica no Service, dados no Repository.
 - **Frontend**: React + TypeScript para tipagem segura. Axios para API. Temas como extra para customização por org.
 - **Docker**: Adicionado para facilitar rodar (diferencial).
@@ -143,7 +142,7 @@ Como diferencial, implementei testes básicos usando PHPUnit (Laravel). Foco em 
 
 
 ## O que Faria Diferente com Mais Tempo
-- Implementar funcionalidades avançadas de customização por tenant (organização), como permitir que cada tenant defina um estilo de tema  único (claro ou escuro) 
+- Implementaria funcionalidades avançadas de customização por tenant (organização), como permitir que cada tenant defina um estilo de tema  único (claro ou escuro).. 
 - Testes end-to-end com Cypress + criação de outros testes.
 - Adicionar CRUD completo para tenants (editar/deletar, criar tenant já funciona na tela de registro).
 - Autenticação social ou roles (ex.: admin por org).
@@ -152,9 +151,12 @@ Como diferencial, implementei testes básicos usando PHPUnit (Laravel). Foco em 
 - [x] Rodei composer install e as migrations funcionaram.
 - [x] Seeders criaram os dados de teste.
 - [x] Login retorna um token.
-- [x] User1 NÃO consegue ver tarefas do User2 (TESTE ISSO!).
+- [x] User1 NÃO consegue ver tarefas do User2.
 - [x] Segui o padrão Controller → Service → Repository.
 - [x] Frontend consome a API e funciona.
 - [x] README tem instruções claras de como rodar.
 - [x] .env.example está atualizado.
 - [x] Projeto roda sem erros.
+
+## Notas Finais
+- Comecei o projeto visando desenvolver a funcionalidade de cada Tenant ter seu propio estilo de tema eu resolvi me desafiar, mas devido ao curto prazo de entrega do proheto essa funcionalidade ainda não está funcionando, ao longo dos proximos dias pretendo adicionar ela no projeto, por isso estruturei a tabela de organizações tendo campos como primaryColor e themeStyle
