@@ -40,27 +40,32 @@ export default function Dashboard() {
   }, [token]);
 
   const handleCreate = (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log('Tentando criar tarefa:', { ...newTask, token }); // Debug
-    if (!token) {
-      setError('Usuário não autenticado');
-      return;
-    }
-    setLoading(true);
-    axios.post('http://localhost:8000/api/tasks', newTask, {
-      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-    })
-      .then((res) => {
-        console.log('Tarefa criada:', res.data); // Debug
-        setTasks([...tasks, res.data]);
-        setNewTask({ title: '', description: '' });
-      })
-      .catch((err) => {
-        console.error('Erro ao criar tarefa:', err.response?.data || err.message); // Debug
-        setError('Erro ao criar tarefa: ' + (err.response?.data?.message || ''));
-      })
-      .finally(() => setLoading(false));
-  };
+  e.preventDefault();
+
+  if (!token) {
+    setError('Usuário não autenticado');
+    return;
+  }
+
+  setLoading(true);
+  axios.post('http://localhost:8000/api/tasks', newTask, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+      'Accept': 'application/json'
+    },
+  })
+  .then((res) => {
+    console.log('Tarefa criada:', res.data);
+    setTasks([...tasks, res.data]);
+    setNewTask({ title: '', description: '' }); // Remove user_id e organization_id
+  })
+  .catch((err) => {
+    console.error('Erro ao criar tarefa:', err.response?.data || err.message);
+    setError('Erro ao criar tarefa: ' + (err.response?.data?.message || err.message));
+  })
+  .finally(() => setLoading(false));
+};
 
   return (
     <AuthenticatedLayout
