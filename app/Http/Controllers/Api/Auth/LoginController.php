@@ -13,7 +13,6 @@ class LoginController extends Controller
 {
     public function __invoke(LoginRequest $request): JsonResponse
     {
-        Log::info('LoginController chamado', $request->validated());
 
         $data = $request->validated();
         $user = User::where('email', $data['email'])->first();
@@ -24,8 +23,6 @@ class LoginController extends Controller
         }
 
         $token = $user->createToken('auth_token')->plainTextToken;
-
-        Log::info('Usuário logado e token gerado', ['user_id' => $user->id, 'token' => $token]);
 
         return response()->json(['user' => $user, 'token' => $token]);
     }

@@ -27,21 +27,18 @@ class TaskService
 {
     $user = Auth::guard('sanctum')->user();
     if (!$user) {
-        Log::error('Usuário não autenticado em createTask', ['token' => request()->header('Authorization')]);
         throw new AuthorizationException('Usuário não autenticado.');
     }
 
     if (!$user->organization_id) {
-        Log::error('Usuário sem organization_id', ['user_id' => $user->id]);
+
         throw new AuthorizationException('Usuário sem organização associada.');
     }
 
-    Log::info('Criando task para usuário', ['user_id' => $user->id, 'organization_id' => $user->organization_id, 'data' => $data]);
 
     $data['organization_id'] = $user->organization_id;
     $task = $this->taskRepository->create($data);
 
-    Log::info('Task criada com sucesso', ['task_id' => $task->id, 'organization_id' => $task->organization_id]);
 
     return $task;
 }
@@ -78,9 +75,7 @@ class TaskService
     {
         $user = Auth::guard('sanctum')->user();
         if (!$user || $task->organization_id !== $user->organization_id) {
-            Log::error('Autorização falhou', ['task_organization_id' => $task->organization_id, 'user_organization_id' => $user->organization_id ?? 'null', 'token' => request()->header('Authorization')]);
             throw new AuthorizationException('Unauthorized');
         }
-        Log::info('Autorização bem-sucedida', ['task_organization_id' => $task->organization_id, 'user_organization_id' => $user->organization_id]);
     }
 }
