@@ -8,7 +8,7 @@ A aplicação inclui:
 - Autenticação com registro, login e logout.
 - Gestão de tarefas: listagem, criação, edição, deleção e mudança de status.
 - Isolamento rigoroso: Tarefas são filtradas pela organização do usuário logado.
-- Extras: Suporte a temas customizáveis por organização (cores primária/secundária e modo light/dark), paginação no frontend e validações.
+- Extras que faltam ser terminados: Suporte a temas customizáveis por organização (cores primária/secundária e modo light/dark), paginação no frontend e validações.
 
 O código segue o padrão Controller → Service → Repository para tarefas, garantindo organização e manutenção fácil.
 
@@ -28,8 +28,8 @@ O código segue o padrão Controller → Service → Repository para tarefas, ga
 ### Passos para Rodar o Projeto
 1. **Clone o Repositório**:
    ```
-   git clone https://seu-repositorio.git
-   cd seu-repositorio
+   git clone https://github.com/GabrielR4SH/laravel_tenancy_project.git
+   cd laravel_tenancy_project
    ```
 
 2. **Configure o Ambiente**:
@@ -90,7 +90,7 @@ Todos os endpoints estão sob `/api`. Use Postman ou similar para testar. Endpoi
 
 ### Autenticação
 - **POST /api/register**
-  - Body: `{ "name": "string", "email": "string", "password": "string", "organization_name": "string" ou "organization_id": int }`
+  - Body: `{ "name": "string", "email": "string", "password": "string", "organization_name": "string" }`
   - Retorna: `{ "user": {...}, "token": "string" }`
 
 - **POST /api/login**
@@ -104,12 +104,11 @@ Todos os endpoints estão sob `/api`. Use Postman ou similar para testar. Endpoi
 - **GET /api/organizations**
   - Retorna: Lista de organizações `{ id, name }` (para seleção no registro).
 
-- **GET /api/organization/theme** (autenticado)
-  - Retorna: `{ "primary_color": "hex", "secondary_color": "hex", "theme_style": "light|dark" }`
-
 ### Tarefas (Autenticadas, Isoladas por Organização)
+
 - **GET /api/tasks**
   - Retorna: Lista de tarefas da organização do usuário.
+  - Pré-requisito: Requer token de autenticação no header (Authorization: Bearer <token>) em todos endpoints abaixo.
 
 - **POST /api/tasks**
   - Body: `{ "title": "string", "description": "string" }`
@@ -142,8 +141,6 @@ Como diferencial, implementei testes básicos usando PHPUnit (Laravel). Foco em 
 - **Docker**: Adicionado para facilitar rodar (diferencial).
 - **Outros**: Adicionei prioridades e datas nas tarefas como extras. Paginação client-side para simplicidade.
 
-## Tempo Gasto
-Aproximadamente 7 horas: 3h backend (estrutura, multi-tenancy), 2h frontend (integração API), 1h testes e Docker, 1h depuração e temas.
 
 ## O que Faria Diferente com Mais Tempo
 - Implementar funcionalidades avançadas de customização por tenant (organização), como permitir que cada tenant defina um estilo de tema  único (claro ou escuro) 
