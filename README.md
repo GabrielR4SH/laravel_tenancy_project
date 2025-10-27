@@ -1,61 +1,163 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Aplicação de Gestão de Tarefas com Multi-Tenancy
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+## Introdução
 
-## About Laravel
+Esta aplicação é uma solução para o teste técnico de Desenvolvedor Full Stack. O objetivo é construir uma aplicação web de gestão de tarefas com isolamento por organização (multi-tenancy). Cada organização tem seu próprio "espaço" isolado, garantindo que usuários de diferentes organizações não acessem dados uns dos outros. Isso é crítico para a segurança e privacidade.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+A aplicação inclui:
+- Autenticação com registro, login e logout.
+- Gestão de tarefas: listagem, criação, edição, deleção e mudança de status.
+- Isolamento rigoroso: Tarefas são filtradas pela organização do usuário logado.
+- Extras: Suporte a temas customizáveis por organização (cores primária/secundária e modo light/dark), paginação no frontend e validações.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+O código segue o padrão Controller → Service → Repository para tarefas, garantindo organização e manutenção fácil.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## Tecnologias Utilizadas
 
-## Learning Laravel
+- **Backend**: Laravel 12, MySQL (ou PostgreSQL), Laravel Sanctum para autenticação.
+- **Frontend**: React com TypeScript, Inertia.js para integração com Laravel, Tailwind CSS para estilização.
+- **Outros**: Docker para containerização, Axios para chamadas API, Vite para desenvolvimento frontend.
+- **Padrão de Código**: Controller (coordenação), Service (lógica de negócio), Repository (acesso a dados).
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+## Configuração e Instalação
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+### Requisitos
+- Docker e Docker Compose instalados.
+- Git para clonar o repositório.
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### Passos para Rodar o Projeto
+1. **Clone o Repositório**:
+   ```
+   git clone https://seu-repositorio.git
+   cd seu-repositorio
+   ```
 
-## Laravel Sponsors
+2. **Configure o Ambiente**:
+   - Copie `.env.example` para `.env` e ajuste variáveis se necessário (ex.: DB_HOST=db, DB_DATABASE=tenancy_db, DB_USERNAME=user, DB_PASSWORD=password).
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+3. **Construa e Inicie os Containers com Docker**:
+   ```
+   docker-compose up -d --build
+   ```
+   - Isso inicia: App (PHP/Laravel), DB (MySQL), Web (Nginx).
 
-### Premium Partners
+4. **Instale Dependências do Backend**:
+   ```
+   docker-compose exec app composer install
+   ```
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+5. **Gere a Chave da Aplicação**:
+   ```
+   docker-compose exec app php artisan key:generate
+   ```
 
-## Contributing
+6. **Execute as Migrations**:
+   ```
+   docker-compose exec app php artisan migrate
+   ```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+7. **Execute os Seeders** (para dados de teste):
+   ```
+   docker-compose exec app php artisan db:seed
+   ```
+   - Isso cria: Org A (user1@org1.com / password, 5 tarefas), Org B (user2@org2.com / password, 5 tarefas), Org C (user3@org3.com / password, 5 tarefas).
 
-## Code of Conduct
+8. **Instale Dependências do Frontend**:
+   ```
+   docker-compose exec app npm install
+   ```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+9. **Inicie o Servidor de Desenvolvimento Frontend (Vite)**:
+   ```
+   docker-compose exec app npm run dev
+   ```
 
-## Security Vulnerabilities
+10. **Acesse a Aplicação**:
+    - Frontend: http://localhost:8080 (via Nginx).
+    - API: http://localhost:8000/api (direto no Laravel).
+    - Teste com usuários seedados para verificar multi-tenancy.
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+### Docker Configuração
+- **docker-compose.yml**: Define serviços para app (Laravel), db (MySQL), web (Nginx).
+- **Dockerfile**: Baseado em PHP 8.3-fpm, instala Composer, Node.js, e dependências para Laravel.
+- **nginx.conf**: Configura proxy para o app PHP-FPM.
 
-## License
+Para parar: `docker-compose down`.
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+## Endpoints da API
+
+Todos os endpoints estão sob `/api`. Use Postman ou similar para testar. Endpoints protegidos requerem header `Authorization: Bearer {token}` (obtido via login/register).
+
+### Autenticação
+- **POST /api/register**
+  - Body: `{ "name": "string", "email": "string", "password": "string", "organization_name": "string" ou "organization_id": int }`
+  - Retorna: `{ "user": {...}, "token": "string" }`
+
+- **POST /api/login**
+  - Body: `{ "email": "string", "password": "string" }`
+  - Retorna: `{ "user": {...}, "token": "string" }`
+
+- **POST /api/logout** (autenticado)
+  - Retorna: `{ "message": "Logged out" }`
+
+### Organizações (Auxiliares)
+- **GET /api/organizations**
+  - Retorna: Lista de organizações `{ id, name }` (para seleção no registro).
+
+- **GET /api/organization/theme** (autenticado)
+  - Retorna: `{ "primary_color": "hex", "secondary_color": "hex", "theme_style": "light|dark" }`
+
+### Tarefas (Autenticadas, Isoladas por Organização)
+- **GET /api/tasks**
+  - Retorna: Lista de tarefas da organização do usuário.
+
+- **POST /api/tasks**
+  - Body: `{ "title": "string", "description": "string" }`
+  - Retorna: Tarefa criada.
+
+- **GET /api/tasks/{id}**
+  - Retorna: Detalhes da tarefa.
+
+- **PUT /api/tasks/{id}**
+  - Body: `{ "title": "string", "description": "string" }`
+  - Retorna: Tarefa atualizada.
+
+- **DELETE /api/tasks/{id}**
+  - Retorna: 204 No Content.
+
+- **PATCH /api/tasks/{id}/status**
+  - Body: `{ "status": "pending|in_progress|done" }`
+  - Retorna: Tarefa com status atualizado.
+
+## Testes Unitários
+
+Como diferencial, implementei testes básicos usando PHPUnit (Laravel). Foco em multi-tenancy e endpoints críticos. Rode com `docker-compose exec app php artisan test`.
+
+(mesmo que poucos, como pedido).
+
+## Decisões Técnicas
+- **Multi-Tenancy**: Implementado filtrando queries por `organization_id` do usuário logado no Service/Repository. Testado com seeders.
+- **Padrão Controller-Service-Repository**: Aplicado apenas às tarefas, como exemplo no teste. Controllers enxutos, lógica no Service, dados no Repository.
+- **Frontend**: React + TypeScript para tipagem segura. Axios para API. Temas como extra para customização por org.
+- **Docker**: Adicionado para facilitar rodar (diferencial).
+- **Outros**: Adicionei prioridades e datas nas tarefas como extras. Paginação client-side para simplicidade.
+
+## Tempo Gasto
+Aproximadamente 7 horas: 3h backend (estrutura, multi-tenancy), 2h frontend (integração API), 1h testes e Docker, 1h depuração e temas.
+
+## O que Faria Diferente com Mais Tempo
+- Implementar funcionalidades avançadas de customização por tenant (organização), como permitir que cada tenant defina um estilo de tema  único (claro ou escuro) 
+- Testes end-to-end com Cypress + criação de outros testes.
+- Adicionar CRUD completo para tenants (editar/deletar, criar tenant já funciona na tela de registro).
+- Autenticação social ou roles (ex.: admin por org).
+
+## Checklist Antes de Enviar
+- [x] Rodei composer install e as migrations funcionaram.
+- [x] Seeders criaram os dados de teste.
+- [x] Login retorna um token.
+- [x] User1 NÃO consegue ver tarefas do User2 (TESTE ISSO!).
+- [x] Segui o padrão Controller → Service → Repository.
+- [x] Frontend consome a API e funciona.
+- [x] README tem instruções claras de como rodar.
+- [x] .env.example está atualizado.
+- [x] Projeto roda sem erros.
