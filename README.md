@@ -8,7 +8,7 @@ A aplicação inclui:
 - Autenticação com registro, login e logout.
 - Gestão de tarefas: listagem, criação, edição, deleção e mudança de status.
 - Isolamento rigoroso: Tarefas são filtradas pela organização do usuário logado.
-- Extras: Suporte a temas customizáveis por organização (cores primária/secundária e modo light/dark), paginação no frontend e validações.
+- Extras que faltam ser terminados: Suporte a temas customizáveis por organização (cores primária/secundária e modo light/dark), paginação no frontend e validações.
 
 O código segue o padrão Controller → Service → Repository para tarefas, garantindo organização e manutenção fácil.
 
@@ -28,8 +28,8 @@ O código segue o padrão Controller → Service → Repository para tarefas, ga
 ### Passos para Rodar o Projeto
 1. **Clone o Repositório**:
    ```
-   git clone https://seu-repositorio.git
-   cd seu-repositorio
+   git clone https://github.com/GabrielR4SH/laravel_tenancy_project.git
+   cd laravel_tenancy_project
    ```
 
 2. **Configure o Ambiente**:
@@ -90,7 +90,7 @@ Todos os endpoints estão sob `/api`. Use Postman ou similar para testar. Endpoi
 
 ### Autenticação
 - **POST /api/register**
-  - Body: `{ "name": "string", "email": "string", "password": "string", "organization_name": "string" ou "organization_id": int }`
+  - Body: `{ "name": "string", "email": "string", "password": "string", "organization_name": "string" }`
   - Retorna: `{ "user": {...}, "token": "string" }`
 
 - **POST /api/login**
@@ -104,12 +104,11 @@ Todos os endpoints estão sob `/api`. Use Postman ou similar para testar. Endpoi
 - **GET /api/organizations**
   - Retorna: Lista de organizações `{ id, name }` (para seleção no registro).
 
-- **GET /api/organization/theme** (autenticado)
-  - Retorna: `{ "primary_color": "hex", "secondary_color": "hex", "theme_style": "light|dark" }`
-
 ### Tarefas (Autenticadas, Isoladas por Organização)
+
 - **GET /api/tasks**
   - Retorna: Lista de tarefas da organização do usuário.
+  - Pré-requisito: Requer token de autenticação no header (Authorization: Bearer <token>) em todos endpoints abaixo.
 
 - **POST /api/tasks**
   - Body: `{ "title": "string", "description": "string" }`
@@ -136,17 +135,14 @@ Como diferencial, implementei testes básicos usando PHPUnit (Laravel). Foco em 
 (mesmo que poucos, como pedido).
 
 ## Decisões Técnicas
-- **Multi-Tenancy**: Implementado filtrando queries por `organization_id` do usuário logado no Service/Repository. Testado com seeders.
 - **Padrão Controller-Service-Repository**: Aplicado apenas às tarefas, como exemplo no teste. Controllers enxutos, lógica no Service, dados no Repository.
 - **Frontend**: React + TypeScript para tipagem segura. Axios para API. Temas como extra para customização por org.
 - **Docker**: Adicionado para facilitar rodar (diferencial).
 - **Outros**: Adicionei prioridades e datas nas tarefas como extras. Paginação client-side para simplicidade.
 
-## Tempo Gasto
-Aproximadamente 7 horas: 3h backend (estrutura, multi-tenancy), 2h frontend (integração API), 1h testes e Docker, 1h depuração e temas.
 
 ## O que Faria Diferente com Mais Tempo
-- Implementar funcionalidades avançadas de customização por tenant (organização), como permitir que cada tenant defina um estilo de tema  único (claro ou escuro) 
+- Implementaria funcionalidades avançadas de customização por tenant (organização), como permitir que cada tenant defina um estilo de tema  único (claro ou escuro).. 
 - Testes end-to-end com Cypress + criação de outros testes.
 - Adicionar CRUD completo para tenants (editar/deletar, criar tenant já funciona na tela de registro).
 - Autenticação social ou roles (ex.: admin por org).
@@ -155,9 +151,12 @@ Aproximadamente 7 horas: 3h backend (estrutura, multi-tenancy), 2h frontend (int
 - [x] Rodei composer install e as migrations funcionaram.
 - [x] Seeders criaram os dados de teste.
 - [x] Login retorna um token.
-- [x] User1 NÃO consegue ver tarefas do User2 (TESTE ISSO!).
+- [x] User1 NÃO consegue ver tarefas do User2.
 - [x] Segui o padrão Controller → Service → Repository.
 - [x] Frontend consome a API e funciona.
 - [x] README tem instruções claras de como rodar.
 - [x] .env.example está atualizado.
 - [x] Projeto roda sem erros.
+
+## Notas Finais
+- Comecei o projeto visando desenvolver a funcionalidade de cada Tenant ter seu propio estilo de tema eu resolvi me desafiar, mas devido ao curto prazo de entrega do proheto essa funcionalidade ainda não está funcionando, ao longo dos proximos dias pretendo adicionar ela no projeto, por isso estruturei a tabela de organizações tendo campos como primaryColor e themeStyle
