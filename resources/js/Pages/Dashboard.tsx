@@ -19,7 +19,7 @@ export default function Dashboard() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const tasksPerPage = 10;
+  const tasksPerPage = 5; // Alterado para 5 tarefas por página
   const [theme, setTheme] = useState({ primary: '#0000FF', secondary: '#FFFFFF', style: 'light' });
 
   useEffect(() => {
@@ -27,16 +27,11 @@ export default function Dashboard() {
     const storedUser = JSON.parse(localStorage.getItem('user') || 'null');
 
     if (!storedToken || !storedUser) {
-        router.visit(route('login'));
-        return;
+      router.visit('/login');
+      return;
     }
 
-    // if (!token || !user) {
-    //   router.visit(route('login'));
-    //   return;
-    // }
-
-    // Fetch theme from organization
+    // Buscar tema da organização
     axios.get('/api/organization/theme', {
       headers: { Authorization: `Bearer ${token}` },
     })
@@ -49,7 +44,7 @@ export default function Dashboard() {
       })
       .catch(() => setError('Erro ao carregar tema da organização'));
 
-    // Fetch tasks
+    // Buscar tarefas
     setLoading(true);
     axios.get(`/api/tasks?page=${currentPage}`, {
       headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' },
@@ -126,17 +121,17 @@ export default function Dashboard() {
       .finally(() => setLoading(false));
   };
 
-  // Pagination
+  // Paginação
   const indexOfLastTask = currentPage * tasksPerPage;
   const indexOfFirstTask = indexOfLastTask - tasksPerPage;
   const currentTasks = tasks.slice(indexOfFirstTask, indexOfLastTask);
   const totalPages = Math.ceil(tasks.length / tasksPerPage);
 
-  if (!user) return null; // Or loading spinner
+  if (!user) return null; // Ou um spinner de carregamento
 
   return (
-    <AuthenticatedLayout user={user} header={<h2 className="font-semibold text-xl text-gray-800 leading-tight">Dashboard</h2>}>
-      <Head title="Dashboard" />
+    <AuthenticatedLayout user={user} header={<h2 className="font-semibold text-xl text-gray-800 leading-tight">Painel</h2>}>
+      <Head title="Painel" />
       <div className="py-12">
         <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
           {success && <p className="text-green-600 mb-4">{success}</p>}
@@ -202,7 +197,7 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Task Modal for Create/Edit */}
+      {/* Modal para Criar/Editar */}
       <Modal show={showTaskModal} onClose={() => setShowTaskModal(false)}>
         <h2 className="text-lg font-medium mb-4">{editingTask ? 'Editar Tarefa' : 'Criar Nova Tarefa'}</h2>
         <form onSubmit={handleCreateOrUpdate} className="space-y-4">
@@ -230,7 +225,7 @@ export default function Dashboard() {
         </form>
       </Modal>
 
-      {/* Delete Modal */}
+      {/* Modal para Confirmação de Deleção */}
       <Modal show={!!deletingTaskId} onClose={() => setDeletingTaskId(null)}>
         <h2 className="text-lg font-medium mb-4">Confirmar Deleção</h2>
         <p>Tem certeza que deseja deletar esta tarefa?</p>

@@ -5,11 +5,10 @@ import InputError from '@/Components/InputError';
 import InputLabel from '@/Components/InputLabel';
 import PrimaryButton from '@/Components/PrimaryButton';
 import TextInput from '@/Components/TextInput';
-import { Head, Link, router } from '@inertiajs/react'; // Keep router for redirect
+import { Head, Link, router } from '@inertiajs/react';
 import axios from 'axios';
 
 export default function Register() {
-    // Remove Inertia's useForm - we'll handle manually
     const [data, setData] = useState({
         name: '',
         email: '',
@@ -20,12 +19,13 @@ export default function Register() {
     });
     const [errors, setErrors] = useState<{ [key: string]: string }>({});
     const [processing, setProcessing] = useState(false);
+    const [success, setSuccess] = useState<string | null>(null);
 
     const [organizations, setOrganizations] = useState<{ id: number; name: string }[]>([]);
     const [isNewOrg, setIsNewOrg] = useState(true);
 
     useEffect(() => {
-        axios.get('http://localhost:8000/api/organizations')
+        axios.get('/api/organizations') // Removido o localhost:8000 hardcoded
             .then((res) => setOrganizations(res.data))
             .catch(() => console.error('Erro ao carregar organizações'));
     }, []);
@@ -38,8 +38,8 @@ export default function Register() {
         e.preventDefault();
         setProcessing(true);
         setErrors({});
+        setSuccess(null);
 
-        // Prepare payload - exclude the unused org field based on isNewOrg
         const payload = {
             name: data.name,
             email: data.email,
@@ -49,10 +49,10 @@ export default function Register() {
 
         try {
             const response = await axios.post('/api/register', payload);
-            // Store token (adjust based on your auth flow, e.g., localStorage or context)
             localStorage.setItem('auth_token', response.data.token);
-            // Redirect to dashboard or tasks page
-            router.visit('/dashboard'); // Or wherever your tasks list is
+            localStorage.setItem('user', JSON.stringify(response.data.user));
+            setSuccess('Registrado com sucesso!'); // Mensagem de sucesso
+            setTimeout(() => router.visit('/dashboard'), 2000); // Redireciona após 2 segundos
         } catch (error: any) {
             if (error.response?.status === 422) {
                 setErrors(error.response.data.errors || {});
@@ -67,11 +67,13 @@ export default function Register() {
 
     return (
         <GuestLayout>
-            <Head title="Register" />
+            <Head title="Registrar" />
+
+            {success && <div className="mb-4 font-medium text-sm text-green-600">{success}</div>}
 
             <form onSubmit={submit}>
                 <div>
-                    <InputLabel htmlFor="name" value="Name" />
+                    <InputLabel htmlFor="name" value="Nome" />
                     <TextInput
                         id="name"
                         name="name"
@@ -86,7 +88,7 @@ export default function Register() {
                 </div>
 
                 <div className="mt-4">
-                    <InputLabel htmlFor="email" value="Email" />
+                    <InputLabel htmlFor="email" value="E-mail" />
                     <TextInput
                         id="email"
                         type="email"
@@ -101,7 +103,7 @@ export default function Register() {
                 </div>
 
                 <div className="mt-4">
-                    <InputLabel htmlFor="password" value="Password" />
+                    <InputLabel htmlFor="password" value="Senha" />
                     <TextInput
                         id="password"
                         type="password"
@@ -116,7 +118,7 @@ export default function Register() {
                 </div>
 
                 <div className="mt-4">
-                    <InputLabel htmlFor="password_confirmation" value="Confirm Password" />
+                    <InputLabel htmlFor="password_confirmation" value="Confirmar Senha" />
                     <TextInput
                         id="password_confirmation"
                         type="password"
@@ -180,11 +182,11 @@ export default function Register() {
                         href={route('login')}
                         className="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                     >
-                        Already registered?
+                        Já registrado?
                     </Link>
 
                     <PrimaryButton className="ms-4" disabled={processing}>
-                        Register
+                        Registrar
                     </PrimaryButton>
                 </div>
             </form>
