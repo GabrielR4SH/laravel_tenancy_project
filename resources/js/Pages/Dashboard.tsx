@@ -3,17 +3,12 @@ import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Task } from '../types';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Head, usePage } from '@inertiajs/react';
+import { Head, router } from '@inertiajs/react';
 import Modal from '@/Components/Modal';
 
 export default function Dashboard() {
-  const { auth } = usePage().props as any;
-  const user = auth.user;
-  const token = localStorage.getItem('token') || auth.token;
-
-  if (token && !localStorage.getItem('token')) {
-    localStorage.setItem('token', token);
-  }
+  const token = localStorage.getItem('auth_token');
+  const user = JSON.parse(localStorage.getItem('user') || 'null');
 
   const [tasks, setTasks] = useState<Task[]>([]);
   const [newTask, setNewTask] = useState({ title: '', description: '', priority: 'medium', due_date: '' });
@@ -28,14 +23,21 @@ export default function Dashboard() {
   const [theme, setTheme] = useState({ primary: '#0000FF', secondary: '#FFFFFF', style: 'light' });
 
   useEffect(() => {
-    if (!token) {
-      setError('Usuário não autenticado. Faça login primeiro.');
-      setLoading(false);
-      return;
+    const storedToken = localStorage.getItem('auth_token');
+    const storedUser = JSON.parse(localStorage.getItem('user') || 'null');
+
+    if (!storedToken || !storedUser) {
+        router.visit(route('login'));
+        return;
     }
 
+    // if (!token || !user) {
+    //   router.visit(route('login'));
+    //   return;
+    // }
+
     // Fetch theme from organization
-    axios.get('http://localhost:8000/api/organization/theme', {
+    axios.get('/api/organization/theme', {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then((res) => {
@@ -49,7 +51,7 @@ export default function Dashboard() {
 
     // Fetch tasks
     setLoading(true);
-    axios.get(`http://localhost:8000/api/tasks?page=${currentPage}`, {
+    axios.get(`/api/tasks?page=${currentPage}`, {
       headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' },
     })
       .then((res) => {
@@ -73,7 +75,7 @@ export default function Dashboard() {
 
     setLoading(true);
     const payload = { ...newTask, organization_id: user.organization_id };
-    const url = editingTask ? `http://localhost:8000/api/tasks/${editingTask.id}` : 'http://localhost:8000/api/tasks';
+    const url = editingTask ? `/api/tasks/${editingTask.id}` : '/api/tasks';
     const method = editingTask ? 'put' : 'post';
 
     axios[method](url, payload, {
@@ -95,7 +97,7 @@ export default function Dashboard() {
     if (!deletingTaskId || !token) return;
 
     setLoading(true);
-    axios.delete(`http://localhost:8000/api/tasks/${deletingTaskId}`, {
+    axios.delete(`/api/tasks/${deletingTaskId}`, {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then(() => {
@@ -112,7 +114,7 @@ export default function Dashboard() {
     if (!token) return setError('Usuário não autenticado');
 
     setLoading(true);
-    axios.patch(`http://localhost:8000/api/tasks/${id}/status`, { status }, {
+    axios.patch(`/api/tasks/${id}/status`, { status }, {
       headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
     })
       .then((res) => {
@@ -129,6 +131,8 @@ export default function Dashboard() {
   const indexOfFirstTask = indexOfLastTask - tasksPerPage;
   const currentTasks = tasks.slice(indexOfFirstTask, indexOfLastTask);
   const totalPages = Math.ceil(tasks.length / tasksPerPage);
+
+  if (!user) return null; // Or loading spinner
 
   return (
     <AuthenticatedLayout user={user} header={<h2 className="font-semibold text-xl text-gray-800 leading-tight">Dashboard</h2>}>
